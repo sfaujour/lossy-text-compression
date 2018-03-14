@@ -2,18 +2,33 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
-
-	"bytes"
-	"github.com/atotto/clipboard"
+	"os/signal"
 	"strings"
+	"syscall"
+
+	"github.com/atotto/clipboard"
 )
 
 func main() {
+	signalChannel := make(chan os.Signal, 1)
+	signal.Notify(signalChannel, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		for {
+			s := <-signalChannel
+			switch s {
+			case syscall.SIGINT, syscall.SIGTERM:
+				os.Exit(0)
+			}
+		}
+	}()
+
 	scanner := bufio.NewScanner(os.Stdin)
 	var text string
-	for text != "q" { // break the loop if text == "q"
+	for {
 		fmt.Print("Enter your text: ")
 		scanner.Scan()
 		text = scanner.Text()
