@@ -1,0 +1,39 @@
+# Build customization
+builds:
+  -
+    main: main.go
+    binary: ltc
+
+    flags: -tags dev
+
+    ldflags: '-extldflags "-static"'
+    env:
+      - CGO_ENABLED=1
+
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+
+# Archive customization
+archive:
+  format: tar.gz
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+  format_overrides:
+    - goos: windows
+      format: zip
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - docs
+      - Merge pull request
+      - Merge branch
