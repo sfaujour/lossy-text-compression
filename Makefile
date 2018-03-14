@@ -10,4 +10,4 @@ install-requirements:
 
 .PHONY: release
 release:
-	goreleaser --skip-publish --rm-dist
+	goreleaser --rm-dist
