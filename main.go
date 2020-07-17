@@ -1,15 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
-
-	"github.com/atotto/clipboard"
 )
 
 func main() {
@@ -26,16 +26,23 @@ func main() {
 		}
 	}()
 
-	scanner := bufio.NewScanner(os.Stdin)
-	var text string
-	for {
-		fmt.Print("Enter your text: ")
-		scanner.Scan()
-		text = scanner.Text()
-		ltcText := ltcWalker(text)
-		fmt.Println("Text with LTC: ", ltcText)
-		clipboard.WriteAll(ltcText)
-	}
+	tmpl := template.Must(template.ParseFiles("index.html"))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			_ = tmpl.Execute(w, nil)
+			return
+		}
+
+		inputText := r.FormValue("inputText")
+		fmt.Println(inputText)
+		result := ltcWalker(inputText)
+		fmt.Println(result)
+
+		tmpl.Execute(w, struct{ Result string }{result})
+	})
+
+	log.Fatal(http.ListenAndServe(":1234", nil))
 }
 
 func ltcWalker(input string) string {
